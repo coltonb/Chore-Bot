@@ -4,7 +4,7 @@ const models = require('./models');
 
 const { Chore } = models;
 
-const botID = process.env.BOT_ID_DEV;
+const botID = process.env.BOT_ID;
 
 function sendMessage(msg, attach) {
   const options = {
@@ -146,9 +146,9 @@ const commands = {
         sendMessage(STRINGS.choreNotFound);
         return;
       }
-      const choreName = chores[0].name;
+      const { name } = chores[0];
       chores[0].destroy();
-      sendMessage(`'${choreName}' removed.`);
+      sendMessage(`'${name}' removed.`);
     },
   },
   assign: {
@@ -160,10 +160,10 @@ const commands = {
         sendMessage(STRINGS.invalidArgs);
         return;
       }
-      const choreName = argsList[0];
+      const name = argsList[0];
       const assignee = argsList[1];
       const chores = await Chore.findAll(
-        { where: { name: { $ilike: `%${choreName}%` } } },
+        { where: { name: { $ilike: `%${name}%` } } },
         { limit: 1 },
       );
       if (chores.length === 0) {
@@ -173,7 +173,7 @@ const commands = {
       const chore = chores[0];
       chore.assignee = assignee;
       await chore.save({ fields: ['assignee'] });
-      sendMessage(`'${choreName}' assigned to ${assignee}.`);
+      sendMessage(`'${chores[0].name}' assigned to ${assignee}.`);
     },
   },
   list: {
