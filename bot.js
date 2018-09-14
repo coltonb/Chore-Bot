@@ -117,12 +117,12 @@ const commands = {
         sendMessage(STRINGS.invalidArgs);
         return;
       }
-      const argsList = args.split(', ');
-      const name = argsList[0];
+      const argsList = args.split(',');
+      const name = argsList[0].trim();
       const options = { name };
       let message = `'${name}' added`;
       if (argsList.length === 2) {
-        const assignee = argsList[1];
+        const assignee = argsList[1].trim();
         options.assignee = assignee;
         message += ` and assigned to ${assignee}.`;
       } else message += '.';
@@ -155,13 +155,13 @@ const commands = {
     usage: STRINGS.assignUsage,
     description: STRINGS.assignDesc,
     async process(args) {
-      const argsList = args.split(', ');
+      const argsList = args.split(',');
       if (argsList.length !== 2) {
         sendMessage(STRINGS.invalidArgs);
         return;
       }
-      const name = argsList[0];
-      const assignee = argsList[1];
+      const name = argsList[0].trim();
+      const assignee = argsList[1].trim();
       const chores = await Chore.findAll(
         { where: { name: { $ilike: `%${name}%` } } },
         { limit: 1 },
@@ -215,7 +215,7 @@ function respond() {
 
     if (message.charAt(0) === '/') {
       const cmd = message.split(' ')[0].substring(1);
-      const args = message.substring(cmd.length + 2);
+      const args = message.substring(cmd.length + 2).trim();
       if (cmd in commands) {
         commands[cmd].process(args);
       }
