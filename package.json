@@ -1,7 +1,7 @@
 {
   "name": "haus-chore-bot",
   "version": "1.0.0",
-  "description": "A chore bot for the HAUS.",
+  "description": "Chore chatbot for GroupMe powered by Node.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -15,24 +15,15 @@
   "engines": {
     "node": "^10.10.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/heroku/node-js-getting-started.git"
-  },
   "keywords": [
     "node",
     "heroku",
     "express"
   ],
-  "license": "MIT",
   "devDependencies": {
     "eslint": "^5.5.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0"
   },
-  "bugs": {
-    "url": "https://github.com/heroku/node-js-getting-started/issues"
-  },
-  "homepage": "https://github.com/heroku/node-js-getting-started#readme",
   "author": "Colton Blake"
 }
