@@ -8,5 +8,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {},
   );
+  Chore.associate = (models) => {
+    Chore.belongsTo(models.Group);
+  };
   return Chore;
 };

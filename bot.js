@@ -2,9 +2,10 @@ const HTTPS = require('https');
 const STRINGS = require('./strings.json');
 const models = require('./models');
 
+const { Group } = models;
 const { Chore } = models;
 
-const botID = process.env.BOT_ID;
+const botID = process.env.BOT_ID_DEV;
 
 function sendMessage(msg, attach) {
   const options = {
@@ -30,24 +31,48 @@ const commands = {
   chores: {
     description: STRINGS.choresDesc,
     async process() {
-      let string = "This week's chores are as follows...\n";
-      const chores = await Chore.findAll({ order: [['id', 'ASC']] });
-      chores.forEach((chore) => {
-        string += `${chore.status ? '✔️' : '✖️'} `;
-        string += `${chore.name}: `;
-        string += `${chore.assignee}\n`;
+      let message = "This week's chores are as follows...";
+      const chores = await Chore.findAll({
+        order: [['GroupId', 'ASC'], ['name', 'DESC']],
+        include: [Group],
       });
-      sendMessage(string);
+      let currentGroup = null;
+      chores.forEach((chore) => {
+        if (currentGroup !== chore.GroupId) {
+          currentGroup = chore.GroupId;
+          message += `\n${chore.Group.name}\n`;
+        }
+        message += `${chore.status ? '✔️' : '✖️'} `;
+        message += `${chore.name}: `;
+        message += `${chore.assignee}\n`;
+      });
+      sendMessage(message);
     },
   },
   rotate: {
     usage: STRINGS.rotateUsage,
     description: STRINGS.rotateDesc,
     async process(args) {
-      let numRotations = parseInt(args, 10);
-      numRotations = !Number.isNaN(numRotations) ? numRotations : 1;
+      if (args.length === 0) {
+        sendMessage(STRINGS.invalidArgs);
+        return;
+      }
+      const argsList = args.split(',');
+      const groupName = argsList[0].trim();
 
-      const chores = await Chore.findAll({ order: [['id', 'ASC']] });
+      let numRotations = 1;
+      if (argsList.length >= 2) {
+        numRotations = parseInt(argsList[1].trim(), 10);
+        numRotations = !Number.isNaN(numRotations) ? numRotations : 1;
+      }
+
+      const group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
+      if (group === null) {
+        sendMessage(STRINGS.groupNotFound);
+        return;
+      }
+
+      const chores = await Chore.findAll({ order: [['id', 'ASC']], where: { GroupId: group.id } });
       if (chores.length === 0) return;
 
       const newChores = chores.slice().reverse();
@@ -73,15 +98,11 @@ const commands = {
         sendMessage(STRINGS.invalidArgs);
         return;
       }
-      const chores = await Chore.findAll(
-        { where: { name: { $ilike: `%${args}%` } } },
-        { limit: 1 },
-      );
-      if (chores.length === 0) {
+      const chore = await Chore.find({ where: { name: { $ilike: `%${args}%` } } });
+      if (chore === null) {
         sendMessage(STRINGS.choreNotFound);
         return;
       }
-      const chore = chores[0];
       chore.status = true;
       chore.save({ fields: ['status'] });
       sendMessage(`'${chore.name}' marked as complete.`);
@@ -95,37 +116,83 @@ const commands = {
         sendMessage(STRINGS.invalidArgs);
         return;
       }
-      const chores = await Chore.findAll(
-        { where: { name: { $ilike: `%${args}%` } } },
-        { limit: 1 },
-      );
-      if (chores.length === 0) {
+      const chore = await Chore.find({ where: { name: { $ilike: `%${args}%` } } });
+      if (chore === null) {
         sendMessage(STRINGS.choreNotFound);
         return;
       }
-      const chore = chores[0];
+
       chore.status = false;
       chore.save({ fields: ['status'] });
       sendMessage(`'${chore.name}' marked as incomplete.`);
+    },
+  },
+  addgroup: {
+    usage: STRINGS.groupUsage,
+    description: STRINGS.addGroupDesc,
+    async process(args) {
+      if (args.length === 0) {
+        sendMessage(STRINGS.invalidArgs);
+        return;
+      }
+
+      const argsList = args.split(',');
+      const groupName = argsList[0].trim();
+
+      const options = { name: groupName };
+      const message = `'${groupName}' added to groups.`;
+      await Group.create(options);
+      sendMessage(message);
+    },
+  },
+  removegroup: {
+    usage: STRINGS.groupUsage,
+    description: STRINGS.removeGroupDesc,
+    async process(args) {
+      if (args.length === 0) {
+        sendMessage(STRINGS.invalidArgs);
+        return;
+      }
+
+      const group = await Group.find({ where: { name: { $ilike: `%${args}%` } } });
+      if (group === null) {
+        sendMessage(STRINGS.groupNotFound);
+        return;
+      }
+
+      const { name } = group;
+      group.destroy();
+      sendMessage(`'${name}' removed.`);
     },
   },
   addchore: {
     usage: STRINGS.addChoreUsage,
     description: STRINGS.addDesc,
     async process(args) {
-      if (args.length === 0) {
+      if (args.length < 2) {
         sendMessage(STRINGS.invalidArgs);
         return;
       }
+
       const argsList = args.split(',');
-      const name = argsList[0].trim();
-      const options = { name };
-      let message = `'${name}' added`;
-      if (argsList.length === 2) {
-        const assignee = argsList[1].trim();
+      const groupName = argsList[0].trim();
+
+      const group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
+      if (group === null) {
+        sendMessage(STRINGS.groupNotFound);
+        return;
+      }
+
+      const choreName = argsList[1].trim();
+      const options = { name: choreName, GroupId: group.id };
+      let message = `'${choreName}' added to ${group.name}`;
+      if (argsList.length === 3) {
+        const assignee = argsList[2].trim();
         options.assignee = assignee;
         message += ` and assigned to ${assignee}.`;
-      } else message += '.';
+      } else {
+        message += '.';
+      }
       await Chore.create(options);
       sendMessage(message);
     },
@@ -138,16 +205,13 @@ const commands = {
         sendMessage(STRINGS.invalidArgs);
         return;
       }
-      const chores = await Chore.findAll(
-        { where: { name: { $ilike: `%${args}%` } } },
-        { limit: 1 },
-      );
-      if (chores.length === 0) {
+      const chore = await Chore.find({ where: { name: { $ilike: `%${args}%` } } });
+      if (chore === null) {
         sendMessage(STRINGS.choreNotFound);
         return;
       }
-      const { name } = chores[0];
-      chores[0].destroy();
+      const { name } = chore;
+      chore.destroy();
       sendMessage(`'${name}' removed.`);
     },
   },
@@ -162,18 +226,14 @@ const commands = {
       }
       const name = argsList[0].trim();
       const assignee = argsList[1].trim();
-      const chores = await Chore.findAll(
-        { where: { name: { $ilike: `%${name}%` } } },
-        { limit: 1 },
-      );
-      if (chores.length === 0) {
+      const chore = await Chore.find({ where: { name: { $ilike: `%${name}%` } } });
+      if (chore === null) {
         sendMessage(STRINGS.choreNotFound);
         return;
       }
-      const chore = chores[0];
       chore.assignee = assignee;
       await chore.save({ fields: ['assignee'] });
-      sendMessage(`'${chores[0].name}' assigned to ${assignee}.`);
+      sendMessage(`'${chore.name}' assigned to ${assignee}.`);
     },
   },
   list: {

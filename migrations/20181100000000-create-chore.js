@@ -15,6 +15,15 @@ module.exports = {
     assignee: {
       type: Sequelize.STRING,
     },
+    GroupId: {
+      type: Sequelize.INTEGER,
+      references: {
+        model: 'Groups',
+        key: 'id',
+      },
+      allowNull: false,
+      onDelete: 'CASCADE',
+    },
     createdAt: {
       allowNull: false,
       type: Sequelize.DATE,
