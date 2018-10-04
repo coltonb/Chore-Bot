@@ -5,7 +5,7 @@ const models = require('./models');
 const { Group } = models;
 const { Chore } = models;
 
-const botID = process.env.BOT_ID_DEV;
+const botID = process.env.BOT_ID;
 
 function sendMessage(msg, attach) {
   const options = {
@@ -33,7 +33,7 @@ const commands = {
     async process() {
       let message = "This week's chores are as follows...";
       const chores = await Chore.findAll({
-        order: [['GroupId', 'ASC'], ['name', 'DESC']],
+        order: [['GroupId', 'ASC'], ['id', 'ASC']],
         include: [Group],
       });
       let currentGroup = null;
@@ -57,6 +57,7 @@ const commands = {
         sendMessage(STRINGS.invalidArgs);
         return;
       }
+
       const argsList = args.split(',');
       const groupName = argsList[0].trim();
 
@@ -87,7 +88,7 @@ const commands = {
       }
 
       await Promise.all(newChores.map(chore => chore.save({ fields: ['assignee', 'status'] })));
-      sendMessage(`Rotating chores ${numRotations} time(s)...\n`);
+      sendMessage(`Rotating ${group.name} chores ${numRotations} time(s)...\n`);
     },
   },
   do: {
@@ -98,11 +99,35 @@ const commands = {
         sendMessage(STRINGS.invalidArgs);
         return;
       }
-      const chore = await Chore.find({ where: { name: { $ilike: `%${args}%` } } });
+
+      const argsList = args.split(',');
+      const choreName = argsList[0].trim();
+
+      let group = null;
+
+      if (argsList.length >= 2) {
+        const groupName = argsList[1].trim();
+        group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
+        if (group === null) {
+          sendMessage(STRINGS.groupNotFound);
+          return;
+        }
+      }
+
+      let chore = null;
+      if (group === null) {
+        chore = await Chore.find({ where: { name: { $ilike: `%${choreName}%` } } });
+      } else {
+        chore = await Chore.find({
+          where: { name: { $ilike: `%${choreName}%` }, GroupId: group.id },
+        });
+      }
+
       if (chore === null) {
         sendMessage(STRINGS.choreNotFound);
         return;
       }
+
       chore.status = true;
       chore.save({ fields: ['status'] });
       sendMessage(`'${chore.name}' marked as complete.`);
@@ -116,7 +141,30 @@ const commands = {
         sendMessage(STRINGS.invalidArgs);
         return;
       }
-      const chore = await Chore.find({ where: { name: { $ilike: `%${args}%` } } });
+
+      const argsList = args.split(',');
+      const choreName = argsList[0].trim();
+
+      let group = null;
+
+      if (argsList.length >= 2) {
+        const groupName = argsList[1].trim();
+        group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
+        if (group === null) {
+          sendMessage(STRINGS.groupNotFound);
+          return;
+        }
+      }
+
+      let chore = null;
+      if (group === null) {
+        chore = await Chore.find({ where: { name: { $ilike: `%${choreName}%` } } });
+      } else {
+        chore = await Chore.find({
+          where: { name: { $ilike: `%${choreName}%` }, GroupId: group.id },
+        });
+      }
+
       if (chore === null) {
         sendMessage(STRINGS.choreNotFound);
         return;
@@ -175,7 +223,8 @@ const commands = {
       }
 
       const argsList = args.split(',');
-      const groupName = argsList[0].trim();
+      const choreName = argsList[0].trim();
+      const groupName = argsList[1].trim();
 
       const group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
       if (group === null) {
@@ -183,7 +232,6 @@ const commands = {
         return;
       }
 
-      const choreName = argsList[1].trim();
       const options = { name: choreName, GroupId: group.id };
       let message = `'${choreName}' added to ${group.name}`;
       if (argsList.length === 3) {
@@ -205,11 +253,35 @@ const commands = {
         sendMessage(STRINGS.invalidArgs);
         return;
       }
-      const chore = await Chore.find({ where: { name: { $ilike: `%${args}%` } } });
+
+      const argsList = args.split(',');
+      const choreName = argsList[0].trim();
+
+      let group = null;
+
+      if (argsList.length >= 2) {
+        const groupName = argsList[1].trim();
+        group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
+        if (group === null) {
+          sendMessage(STRINGS.groupNotFound);
+          return;
+        }
+      }
+
+      let chore = null;
+      if (group === null) {
+        chore = await Chore.find({ where: { name: { $ilike: `%${choreName}%` } } });
+      } else {
+        chore = await Chore.find({
+          where: { name: { $ilike: `%${choreName}%` }, GroupId: group.id },
+        });
+      }
+
       if (chore === null) {
         sendMessage(STRINGS.choreNotFound);
         return;
       }
+
       const { name } = chore;
       chore.destroy();
       sendMessage(`'${name}' removed.`);
@@ -220,17 +292,39 @@ const commands = {
     description: STRINGS.assignDesc,
     async process(args) {
       const argsList = args.split(',');
-      if (argsList.length !== 2) {
+
+      if (argsList.length < 2) {
         sendMessage(STRINGS.invalidArgs);
         return;
       }
-      const name = argsList[0].trim();
+
+      const choreName = argsList[0].trim();
       const assignee = argsList[1].trim();
-      const chore = await Chore.find({ where: { name: { $ilike: `%${name}%` } } });
+      let group = null;
+
+      if (argsList.length >= 3) {
+        const groupName = argsList[1].trim();
+        group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
+        if (group === null) {
+          sendMessage(STRINGS.groupNotFound);
+          return;
+        }
+      }
+
+      let chore = null;
+      if (group === null) {
+        chore = await Chore.find({ where: { name: { $ilike: `%${choreName}%` } } });
+      } else {
+        chore = await Chore.find({
+          where: { name: { $ilike: `%${choreName}%` }, GroupId: group.id },
+        });
+      }
+
       if (chore === null) {
         sendMessage(STRINGS.choreNotFound);
         return;
       }
+
       chore.assignee = assignee;
       await chore.save({ fields: ['assignee'] });
       sendMessage(`'${chore.name}' assigned to ${assignee}.`);
