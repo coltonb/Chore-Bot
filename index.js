@@ -1,28 +1,25 @@
-const http = require('http');
-const director = require('director');
+const express = require('express');
+const bodyParser = require('body-parser');
 const bot = require('./bot.js');
+const models = require('./models');
 
-const router = new director.http.Router({
-  '/': {
-    post: bot.respond,
-    get: () => {
-      this.res.writeHead(200);
-      this.res.end('Pong!');
-    },
-  },
+const { Chore } = models;
+const { Group } = models;
+
+const app = express();
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+app.get('/', async (req, res) => {
+  const groups = await Group.findAll({ order: [['id', 'ASC']] });
+  const chores = await Chore.findAll({ order: [['id', 'ASC']] });
+  res.render('index', { groups, chores });
 });
 
-const server = http.createServer((req, res) => {
-  req.chunks = [];
-  req.on('data', (chunk) => {
-    req.chunks.push(chunk.toString());
-  });
-
-  router.dispatch(req, res, (err) => {
-    res.writeHead(err.status, { 'Content-Type': 'text/plain' });
-    res.end(err.message);
-  });
+app.post('/', (req) => {
+  bot.respond(req.body);
 });
 
 const port = Number(process.env.PORT || 5000);
-server.listen(port);
+app.listen(port);

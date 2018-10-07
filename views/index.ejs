@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+</head>
+
+<body class="container">
+    <% groups.forEach((group) => { %>
+        <h2><%= group.name %></h2>
+        <table class="table">
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Assignee</th>
+                <th>Status</th>
+            </tr>
+            <% chores.forEach((chore) => { if (chore.GroupId === group.id) { %>
+                <tr>
+                    <td><%= chore.id %></td>
+                    <td><%= chore.name %></td>
+                    <td><%= chore.assignee %></td>
+                    <td><%= chore.status ? 'Complete' : 'Incomplete' %></td>
+                </tr>
+            <% } }); %>
+        </table>
+    <% }); %>
+</body>
+
+</html>

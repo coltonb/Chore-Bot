@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const HTTPS = require('https');
 const STRINGS = require('./strings.json');
 const models = require('./models');
@@ -67,7 +68,7 @@ const commands = {
         numRotations = !Number.isNaN(numRotations) ? numRotations : 1;
       }
 
-      const group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
+      const group = await Group.find({ where: { name: { [Op.iLike]: `%${groupName}%` } } });
       if (group === null) {
         sendMessage(STRINGS.groupNotFound);
         return;
@@ -107,7 +108,7 @@ const commands = {
 
       if (argsList.length >= 2) {
         const groupName = argsList[1].trim();
-        group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
+        group = await Group.find({ where: { name: { [Op.iLike]: `%${groupName}%` } } });
         if (group === null) {
           sendMessage(STRINGS.groupNotFound);
           return;
@@ -116,10 +117,10 @@ const commands = {
 
       let chore = null;
       if (group === null) {
-        chore = await Chore.find({ where: { name: { $ilike: `%${choreName}%` } } });
+        chore = await Chore.find({ where: { name: { [Op.iLike]: `%${choreName}%` } } });
       } else {
         chore = await Chore.find({
-          where: { name: { $ilike: `%${choreName}%` }, GroupId: group.id },
+          where: { name: { [Op.iLike]: `%${choreName}%` }, GroupId: group.id },
         });
       }
 
@@ -149,7 +150,7 @@ const commands = {
 
       if (argsList.length >= 2) {
         const groupName = argsList[1].trim();
-        group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
+        group = await Group.find({ where: { name: { [Op.iLike]: `%${groupName}%` } } });
         if (group === null) {
           sendMessage(STRINGS.groupNotFound);
           return;
@@ -158,10 +159,10 @@ const commands = {
 
       let chore = null;
       if (group === null) {
-        chore = await Chore.find({ where: { name: { $ilike: `%${choreName}%` } } });
+        chore = await Chore.find({ where: { name: { [Op.iLike]: `%${choreName}%` } } });
       } else {
         chore = await Chore.find({
-          where: { name: { $ilike: `%${choreName}%` }, GroupId: group.id },
+          where: { name: { [Op.iLike]: `%${choreName}%` }, GroupId: group.id },
         });
       }
 
@@ -202,7 +203,7 @@ const commands = {
         return;
       }
 
-      const group = await Group.find({ where: { name: { $ilike: `%${args}%` } } });
+      const group = await Group.find({ where: { name: { [Op.iLike]: `%${args}%` } } });
       if (group === null) {
         sendMessage(STRINGS.groupNotFound);
         return;
@@ -226,7 +227,7 @@ const commands = {
       const choreName = argsList[0].trim();
       const groupName = argsList[1].trim();
 
-      const group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
+      const group = await Group.find({ where: { name: { [Op.iLike]: `%${groupName}%` } } });
       if (group === null) {
         sendMessage(STRINGS.groupNotFound);
         return;
@@ -261,7 +262,7 @@ const commands = {
 
       if (argsList.length >= 2) {
         const groupName = argsList[1].trim();
-        group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
+        group = await Group.find({ where: { name: { [Op.iLike]: `%${groupName}%` } } });
         if (group === null) {
           sendMessage(STRINGS.groupNotFound);
           return;
@@ -270,10 +271,10 @@ const commands = {
 
       let chore = null;
       if (group === null) {
-        chore = await Chore.find({ where: { name: { $ilike: `%${choreName}%` } } });
+        chore = await Chore.find({ where: { name: { [Op.iLike]: `%${choreName}%` } } });
       } else {
         chore = await Chore.find({
-          where: { name: { $ilike: `%${choreName}%` }, GroupId: group.id },
+          where: { name: { [Op.iLike]: `%${choreName}%` }, GroupId: group.id },
         });
       }
 
@@ -304,7 +305,7 @@ const commands = {
 
       if (argsList.length >= 3) {
         const groupName = argsList[1].trim();
-        group = await Group.find({ where: { name: { $ilike: `%${groupName}%` } } });
+        group = await Group.find({ where: { name: { [Op.iLike]: `%${groupName}%` } } });
         if (group === null) {
           sendMessage(STRINGS.groupNotFound);
           return;
@@ -313,10 +314,10 @@ const commands = {
 
       let chore = null;
       if (group === null) {
-        chore = await Chore.find({ where: { name: { $ilike: `%${choreName}%` } } });
+        chore = await Chore.find({ where: { name: { [Op.iLike]: `%${choreName}%` } } });
       } else {
         chore = await Chore.find({
-          where: { name: { $ilike: `%${choreName}%` }, GroupId: group.id },
+          where: { name: { [Op.iLike]: `%${choreName}%` }, GroupId: group.id },
         });
       }
 
@@ -361,11 +362,9 @@ const commands = {
   },
 };
 
-function respond() {
-  const request = JSON.parse(this.req.chunks[0]);
-
-  if (request.text != null) {
-    const message = request.text;
+function respond(req) {
+  if ('text' in req) {
+    const message = req.text;
 
     if (message.charAt(0) === '/') {
       const cmd = message.split(' ')[0].substring(1);
@@ -373,9 +372,6 @@ function respond() {
       if (cmd in commands) {
         commands[cmd].process(args);
       }
-    } else {
-      this.res.writeHead(200);
-      this.res.end();
     }
   }
 }
