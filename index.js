@@ -21,5 +21,19 @@ app.post('/', (req) => {
   bot.respond(req.body);
 });
 
+app.post('/do/:id', async (req) => {
+  const { id } = req.params;
+  const chore = await Chore.find({ where: { id } });
+  chore.status = true;
+  chore.save({ fields: ['status'] });
+});
+
+app.post('/undo/:id', async (req) => {
+  const { id } = req.params;
+  const chore = await Chore.find({ where: { id } });
+  chore.status = false;
+  chore.save({ fields: ['status'] });
+});
+
 const port = Number(process.env.PORT || 5000);
 app.listen(port);
