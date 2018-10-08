@@ -10,7 +10,11 @@
             let currentStatus = document.getElementById(`chore-${id}-status`).innerHTML.trim() == 'Complete';
             let url = !currentStatus ? `do/${id}` : `undo/${id}`;
             const res = await fetch(url, { method: 'POST' });
-            if (res.ok) document.getElementById(`chore-${id}-status`).innerHTML = !currentStatus ? 'Complete' : 'Incomplete';
+            if (res.ok) {
+                const button = document.getElementById(`chore-${id}-status`)
+                button.innerHTML = !currentStatus ? 'Complete' : 'Incomplete';
+                button.className = 'btn btn-' + (!currentStatus ? 'success' : 'primary');
+            }
         }
     </script>
 </head>
@@ -41,7 +45,8 @@
                     <%= chore.assignee %>
                 </td>
                 <td>
-                    <button id="chore-<%= chore.id %>-status" type="button" class="btn btn-primary" onclick="toggleStatus(<%= chore.id %>)">
+                    <button id="chore-<%= chore.id %>-status" type="button" class="btn btn-<%= chore.status ? 'success' : 'primary' %>"
+                        onclick="toggleStatus(<%= chore.id %>)">
                         <%= chore.status ? 'Complete' : 'Incomplete' %>
                     </button>
                 </td>
