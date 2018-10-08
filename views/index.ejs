@@ -6,38 +6,49 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
         crossorigin="anonymous">
     <script>
-        function setStatus(id, value) {
-            let xhr = new XMLHttpRequest();
-            value ? xhr.open('POST', `do/${id}`) : xhr.open('POST', `undo/${id}`);
-            xhr.send();
-            window.location = "/";
+        const toggleStatus = async (id) => {
+            let currentStatus = document.getElementById(`chore-${id}-status`).innerHTML.trim() == 'Complete';
+            let url = !currentStatus ? `do/${id}` : `undo/${id}`;
+            const res = await fetch(url, { method: 'POST' });
+            if (res.ok) document.getElementById(`chore-${id}-status`).innerHTML = !currentStatus ? 'Complete' : 'Incomplete';
         }
     </script>
 </head>
 
 <body class="container">
-    <h1>Chores List</h1>
-    <hr>
+    <div class="jumbotron">
+        <h1>Chores List</h1>
+    </div>
     <% groups.forEach((group) => { %>
-        <h3><%= group.name %></h3>
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Assignee</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% chores.forEach((chore) => { if (chore.GroupId === group.id) { %>
-                    <tr style="cursor: pointer" onclick="setStatus(<%= chore.id %>, <%= !chore.status %>)">
-                        <td><%= chore.name %></td>
-                        <td><%= chore.assignee %></td>
-                        <td><%= chore.status ? 'Complete' : 'Incomplete' %></td>
-                    </tr>
-                <% } }); %>
-            </tbody>
-        </table>
+    <h3>
+        <%= group.name %>
+    </h3>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Assignee</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% chores.forEach((chore) => { if (chore.GroupId === group.id) { %>
+            <tr>
+                <td>
+                    <%= chore.name %>
+                </td>
+                <td>
+                    <%= chore.assignee %>
+                </td>
+                <td>
+                    <button id="chore-<%= chore.id %>-status" type="button" class="btn btn-primary" onclick="toggleStatus(<%= chore.id %>)">
+                        <%= chore.status ? 'Complete' : 'Incomplete' %>
+                    </button>
+                </td>
+            </tr>
+            <% } }); %>
+        </tbody>
+    </table>
     <% }); %>
 </body>
 

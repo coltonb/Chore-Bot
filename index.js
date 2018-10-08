@@ -21,18 +21,26 @@ app.post('/', (req) => {
   bot.respond(req.body);
 });
 
-app.post('/do/:id', async (req) => {
+app.post('/do/:id', async (req, res) => {
   const { id } = req.params;
-  const chore = await Chore.find({ where: { id } });
-  chore.status = true;
-  chore.save({ fields: ['status'] });
+  const response = await Chore.update({ status: true }, { where: { id } });
+  const rows = JSON.parse(response);
+  if (rows === 1) {
+    res.status(200).end();
+  } else {
+    res.status(404).end();
+  }
 });
 
-app.post('/undo/:id', async (req) => {
+app.post('/undo/:id', async (req, res) => {
   const { id } = req.params;
-  const chore = await Chore.find({ where: { id } });
-  chore.status = false;
-  chore.save({ fields: ['status'] });
+  const response = await Chore.update({ status: false }, { where: { id } });
+  const rows = JSON.parse(response);
+  if (rows === 1) {
+    res.status(200).end();
+  } else {
+    res.status(404).end();
+  }
 });
 
 const port = Number(process.env.PORT || 5000);
