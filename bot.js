@@ -74,21 +74,7 @@ const commands = {
         return;
       }
 
-      const chores = await Chore.findAll({ order: [['id', 'ASC']], where: { GroupId: group.id } });
-      if (chores.length === 0) return;
-
-      const newChores = chores.slice().reverse();
-      for (let i = 0; i < numRotations; i += 1) {
-        const firstAssignee = newChores[0].assignee;
-        newChores.forEach((chore, index) => {
-          newChores[index].status = false;
-          if (index === newChores.length - 1) return;
-          newChores[index].assignee = newChores[index + 1].assignee;
-        });
-        newChores[newChores.length - 1].assignee = firstAssignee;
-      }
-
-      await Promise.all(newChores.map(chore => chore.save({ fields: ['assignee', 'status'] })));
+      await group.rotate(numRotations);
       sendMessage(`Rotating ${group.name} chores ${numRotations} time(s)...\n`);
     },
   },

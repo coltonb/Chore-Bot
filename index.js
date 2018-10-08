@@ -25,6 +25,21 @@ app.post('/', (req) => {
   bot.respond(req.body);
 });
 
+app.post('/groups/:id/rotate', async (req, res) => {
+  const { id } = req.params;
+  const group = await Group.find({ where: { id } });
+  if (group === null) {
+    res.status(404).end();
+    return;
+  }
+  try {
+    await group.rotate(1);
+    res.status(200).end();
+  } catch (error) {
+    res.status(500).end();
+  }
+});
+
 app.post('/chores/:id/do', async (req, res) => {
   const { id } = req.params;
   const response = await Chore.update({ status: true }, { where: { id } });
@@ -39,6 +54,18 @@ app.post('/chores/:id/do', async (req, res) => {
 app.post('/chores/:id/undo', async (req, res) => {
   const { id } = req.params;
   const response = await Chore.update({ status: false }, { where: { id } });
+  const rows = JSON.parse(response);
+  if (rows === 1) {
+    res.status(200).end();
+  } else {
+    res.status(404).end();
+  }
+});
+
+app.post('/chores/:id/assign', async (req, res) => {
+  const { id } = req.params;
+  const { assignee } = req.body;
+  const response = await Chore.update({ assignee }, { where: { id } });
   const rows = JSON.parse(response);
   if (rows === 1) {
     res.status(200).end();
