@@ -17,11 +17,15 @@ app.get('/', async (req, res) => {
   res.render('index', { groups, chores });
 });
 
+app.get('/chores', async (req, res) => {
+  res.redirect('/');
+});
+
 app.post('/', (req) => {
   bot.respond(req.body);
 });
 
-app.post('/do/:id', async (req, res) => {
+app.post('/chores/:id/do', async (req, res) => {
   const { id } = req.params;
   const response = await Chore.update({ status: true }, { where: { id } });
   const rows = JSON.parse(response);
@@ -32,7 +36,7 @@ app.post('/do/:id', async (req, res) => {
   }
 });
 
-app.post('/undo/:id', async (req, res) => {
+app.post('/chores/:id/undo', async (req, res) => {
   const { id } = req.params;
   const response = await Chore.update({ status: false }, { where: { id } });
   const rows = JSON.parse(response);

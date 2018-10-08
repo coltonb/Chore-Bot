@@ -8,7 +8,7 @@
     <script>
         const toggleStatus = async (id) => {
             let currentStatus = document.getElementById(`chore-${id}-status`).innerHTML.trim() == 'Complete';
-            let url = !currentStatus ? `do/${id}` : `undo/${id}`;
+            let url = !currentStatus ? `chores/${id}/do` : `chores/${id}/undo`;
             const res = await fetch(url, { method: 'POST' });
             if (res.ok) {
                 const button = document.getElementById(`chore-${id}-status`)
