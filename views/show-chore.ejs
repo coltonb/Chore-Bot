@@ -51,6 +51,18 @@
             </div>
         </ul>
     </div>
+    <script>
+         function deleteChore() {
+            const url = "/groups/<%= group.id %>/chores/<%= chore.id %>/delete";
+            $.post(url, () => {
+                window.location = "/groups/<%= group.id %>";
+            });
+        }
+    </script>
+    <div class="container pt-3">
+        <button class="btn btn-danger" onclick="deleteChore()">Delete Chore</button>
+        <a class="btn btn-primary" href="/groups/<%= group.id %>/chores/<%= chore.id %>/update">Edit Chore</a>
+    </div>
     <% include ./partials/scripts.ejs %>
 </body>
 

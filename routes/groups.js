@@ -12,10 +12,13 @@ router.get('/:id', groupController.showChores);
 router.get('/:groupId/chores', choreController.getChores);
 
 // new chore page
-router.get('/:groupId/chores/new', choreController.newChore);
+router.get('/:groupId/chores/new', choreController.showNewChore);
 
 // show chore
 router.get('/:groupId/chores/:id', choreController.getChore);
+
+// update chore
+router.get('/:groupId/chores/:id/update', choreController.showUpdateChore);
 
 // POST
 
@@ -33,5 +36,12 @@ router.post('/:groupId/chores/:id/assign', choreController.assignChore);
 
 // create chore
 router.post('/:groupId/chores/new', choreController.createChore);
+
+// delete chore
+router.post('/:groupId/chores/:id/delete', choreController.deleteChore);
+
+// update chore
+router.post('/:groupId/chores/:id/update', choreController.updateChore);
+
 
 module.exports = router;

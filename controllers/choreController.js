@@ -31,21 +31,46 @@ exports.getChores = async (req, res) => {
   res.render('index', { groups, chores });
 };
 
-exports.newChore = async (req, res) => {
+exports.showNewChore = async (req, res) => {
   const { groupId } = req.params;
   const group = await Group.find({ where: { id: groupId } });
   res.render('new-chore', { group });
 };
 
+exports.showUpdateChore = async (req, res) => {
+  const { id } = req.params;
+  const { groupId } = req.params;
+  const chore = await Chore.find({ where: { id } });
+  const group = await Group.find({ where: { id: groupId } });
+  res.render('update-chore', { chore, group });
+};
+
 exports.createChore = async (req, res) => {
   const { groupId } = req.params;
+  req.body.GroupId = groupId;
   try {
-    await Chore.create(req.body);
-    res.status(200).end();
+    const newChore = await Chore.create(req.body);
+    res.redirect(`/groups/${groupId}/chores/${newChore.id}`);
   } catch (error) {
-    res.status(409).end();
+    res.redirect(`/groups/${groupId}/chores/new`);
   }
-  res.redirect(`/groups/${groupId}`);
+};
+
+exports.updateChore = async (req, res) => {
+  const { id } = req.params;
+  const { groupId } = req.params;
+  if (!('status' in req.body)) {
+    req.body.status = false;
+  }
+  const response = await Chore.update(req.body, { where: { id } });
+  const rows = JSON.parse(response);
+  if (rows === 1) {
+    res.status(200);
+    res.redirect(`/groups/${groupId}/chores/${id}`);
+  } else {
+    res.status(404);
+    res.redirect('/');
+  }
 };
 
 exports.doChore = async (req, res) => {
@@ -82,5 +107,15 @@ exports.assignChore = async (req, res) => {
   } else {
     res.status(404);
     res.redirect('/');
+  }
+};
+
+exports.deleteChore = async (req, res) => {
+  const { id } = req.params;
+  const rows = await Chore.destroy({ where: { id } });
+  if (rows === 1) {
+    res.status(200).end();
+  } else {
+    res.status(404).end();
   }
 };

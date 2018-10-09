@@ -8,13 +8,13 @@
 <div class="card collapse" id="group-<%= group.id %>-options">
     <div class="card-body p-2">
         <script>
-            async function rotateGroup(id) {
+            function rotateGroup(id) {
                 const url = `/groups/${id}/rotate`;
                 $.post(url, () => {
                     window.location.reload();
                 });
             }
-            async function deleteGroup(id) {
+            function deleteGroup(id) {
                 alert("This isn't implemented (and won't be without user authentication).");
             }
         </script>

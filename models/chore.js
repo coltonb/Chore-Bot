@@ -2,9 +2,25 @@ module.exports = (sequelize, DataTypes) => {
   const Chore = sequelize.define(
     'Chore',
     {
-      name: DataTypes.STRING,
-      status: DataTypes.BOOLEAN,
-      assignee: DataTypes.STRING,
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
+      status: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      assignee: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
     },
     {},
   );

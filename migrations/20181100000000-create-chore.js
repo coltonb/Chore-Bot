@@ -8,12 +8,16 @@ module.exports = {
     },
     name: {
       type: Sequelize.STRING,
+      allowNull: false,
+      notEmpty: true,
     },
     status: {
       type: Sequelize.BOOLEAN,
     },
     assignee: {
       type: Sequelize.STRING,
+      allowNull: false,
+      notEmpty: true,
     },
     GroupId: {
       type: Sequelize.INTEGER,

@@ -9,13 +9,13 @@ const app = express();
 app.set('view engine', 'ejs');
 
 // Configure body-parser
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Configure routes
 app.use('/', indexRouter);
 app.use('/groups', groupsRouter);
-app.use('*', (req, res) => res.redirect('/')); // invalid route
+app.use('/*', (req, res) => res.redirect('/')); // invalid route
 
 const port = Number(process.env.PORT || 5000);
 app.listen(port);

@@ -18,7 +18,7 @@
             </td>
             <td>
                 <script>
-                    async function toggleStatus(event, button, gid, id) {
+                    function toggleStatus(event, button, gid, id) {
                         event.stopPropagation();
                         let currentStatus = button.innerHTML.trim() == 'Complete';
                         let url = !currentStatus ? `/groups/${gid}/chores/${id}/do` : `/groups/${gid}/chores/${id}/undo`;
