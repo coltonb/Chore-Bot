@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <% include ./partials/head.ejs %>
+</head>
+
+<body class="container">
+    <% include ./partials/navBar.ejs %>
+
+    <div class="jumbotron">
+        <h3>
+            Chore details for
+            <%= chore.name %>
+        </h3>
+    </div>
+    <div class="container m-0 justify-content-center row">
+        <ul class="list-group col-auto">
+            <div class="list-group-item">
+                Id:
+            </div>
+            <div class="list-group-item">
+                Name:
+            </div>
+            <div class="list-group-item">
+                Group:
+            </div>
+            <div class="list-group-item">
+                Assignee:
+            </div>
+            <div class="list-group-item">
+                Status:
+            </div>
+        </ul>
+        <ul class="list-group p-0 col">
+            <div class="list-group-item">
+                <%= chore.id %>
+            </div>
+            <div class="list-group-item">
+                <%= chore.name %>
+            </div>
+            <div class="list-group-item">
+                <a href="/groups/<%= group.id %>">
+                    <%= group.name %></a>
+            </div>
+            <div class="list-group-item">
+                <%= chore.assignee %>
+            </div>
+            <div class="list-group-item">
+                <%= chore.status ? 'Complete' : 'Incomplete' %>
+            </div>
+        </ul>
+    </div>
+    <% include ./partials/scripts.ejs %>
+</body>
+
+</html>

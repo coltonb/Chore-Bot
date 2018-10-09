@@ -9,11 +9,11 @@
     <% include ./partials/navBar.ejs %>
 
     <div class="jumbotron">
-        <h3>Chores List</h3>
+        <h3>Chores List for
+            <%= group.name %>
+        </h3>
     </div>
-    <% groups.forEach((group) => { %>
     <% include ./partials/choreTable.ejs %>
-    <% }); %>
     <% include ./partials/scripts.ejs %>
 </body>
 

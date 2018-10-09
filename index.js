@@ -1,78 +1,21 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const bot = require('./bot.js');
-const models = require('./models');
-
-const { Chore } = models;
-const { Group } = models;
+const indexRouter = require('./routes/index');
+const groupsRouter = require('./routes/groups');
 
 const app = express();
+
+// Set view engine to ejs
 app.set('view engine', 'ejs');
+
+// Configure body-parser
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.get('/', async (req, res) => {
-  const groups = await Group.findAll({ order: [['id', 'ASC']] });
-  const chores = await Chore.findAll({ order: [['id', 'ASC']] });
-  res.render('index', { groups, chores });
-});
-
-app.get('/chores', async (req, res) => {
-  res.redirect('/');
-});
-
-app.post('/', (req) => {
-  bot.respond(req.body);
-});
-
-app.post('/groups/:id/rotate', async (req, res) => {
-  const { id } = req.params;
-  const group = await Group.find({ where: { id } });
-  if (group === null) {
-    res.status(404).end();
-    return;
-  }
-  try {
-    await group.rotate(1);
-    res.status(200).end();
-  } catch (error) {
-    res.status(500).end();
-  }
-});
-
-app.post('/chores/:id/do', async (req, res) => {
-  const { id } = req.params;
-  const response = await Chore.update({ status: true }, { where: { id } });
-  const rows = JSON.parse(response);
-  if (rows === 1) {
-    res.status(200).end();
-  } else {
-    res.status(404).end();
-  }
-});
-
-app.post('/chores/:id/undo', async (req, res) => {
-  const { id } = req.params;
-  const response = await Chore.update({ status: false }, { where: { id } });
-  const rows = JSON.parse(response);
-  if (rows === 1) {
-    res.status(200).end();
-  } else {
-    res.status(404).end();
-  }
-});
-
-app.post('/chores/:id/assign', async (req, res) => {
-  const { id } = req.params;
-  const { assignee } = req.body;
-  const response = await Chore.update({ assignee }, { where: { id } });
-  const rows = JSON.parse(response);
-  if (rows === 1) {
-    res.status(200).end();
-  } else {
-    res.status(404).end();
-  }
-});
+// Configure routes
+app.use('/', indexRouter);
+app.use('/groups', groupsRouter);
+app.use('*', (req, res) => res.redirect('/')); // invalid route
 
 const port = Number(process.env.PORT || 5000);
 app.listen(port);

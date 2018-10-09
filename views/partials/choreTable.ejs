@@ -1,0 +1,38 @@
+<% include ./groupHeader.ejs %>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Assignee</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% chores.forEach((chore) => { if (chore.GroupId === group.id) { %>
+        <tr style="cursor: pointer" onclick="window.location='/groups/<%= group.id %>/chores/<%= chore.id %>'">
+            <td>
+                <%= chore.name %>
+            </td>
+            <td>
+                <%= chore.assignee %>
+            </td>
+            <td>
+                <script>
+                    async function toggleStatus(event, button, gid, id) {
+                        event.stopPropagation();
+                        let currentStatus = button.innerHTML.trim() == 'Complete';
+                        let url = !currentStatus ? `/groups/${gid}/chores/${id}/do` : `/groups/${gid}/chores/${id}/undo`;
+                        $.post(url, () => {
+                            button.innerHTML = !currentStatus ? 'Complete' : 'Incomplete';
+                            button.className = 'btn btn-' + (!currentStatus ? 'success' : 'primary');
+                        });
+                    }
+                </script>
+                <button type="button" class="btn btn-<%= chore.status ? 'success' : 'primary' %>" onclick="return toggleStatus(event, this, <%= group.id %>, <%= chore.id %>)">
+                    <%= chore.status ? 'Complete' : 'Incomplete' %>
+                </button>
+            </td>
+        </tr>
+        <% } }); %>
+    </tbody>
+</table>
