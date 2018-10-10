@@ -29,3 +29,8 @@ exports.showChores = async (req, res) => {
   const chores = await group.getChores({ order: [['id', 'ASC']] });
   res.render('group', { group, chores });
 };
+
+exports.showGroups = async (req, res) => {
+  const groups = await Group.findAll();
+  res.render('show-groups', { groups });
+};

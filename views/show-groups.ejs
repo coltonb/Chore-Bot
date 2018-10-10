@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <% include ./partials/head.ejs %>
+</head>
+
+<body class="container">
+    <% include ./partials/navBar.ejs %>
+
+    <div class="jumbotron">
+        <h3>Groups List</h3>
+    </div>
+    <div class="card">
+        <ul class="list-group list-group-flush">
+            <% groups.forEach((group) => { %>
+            <li class="list-group-item">
+                <% include ./partials/groupHeader.ejs %>
+            </li>
+            <% }); %>
+        </ul>
+    </div>
+    <% include ./partials/scripts.ejs %>
+</body>
+
+</html>

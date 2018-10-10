@@ -6,6 +6,10 @@ const router = express.Router();
 
 // GET
 
+// list of groups
+router.get('/', groupController.showGroups);
+
+// show group
 router.get('/:id', groupController.showChores);
 
 // list of chores grouped
