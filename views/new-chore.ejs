@@ -12,6 +12,7 @@
         <h3>New Chore for
             <%= group.name %>
         </h3>
+        <p>Please fill out the form below to create a new chore for <%= group.name %>.</p>
     </div>
 
     <form action="/groups/<%= group.id %>/chores/new" method="post">

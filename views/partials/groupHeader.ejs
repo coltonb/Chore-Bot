@@ -11,7 +11,7 @@
             function rotateGroup(id) {
                 const url = `/groups/${id}/rotate`;
                 $.post(url, () => {
-                    window.location.reload();
+                    window.location = `/groups/${id}`;
                 });
             }
             function deleteGroup(id) {

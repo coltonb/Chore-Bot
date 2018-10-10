@@ -12,6 +12,7 @@
         <h3>Edit
             <%= chore.name %>
         </h3>
+        <p>Please fill out the form to modify the details for <%= chore.name %>.</p>
     </div>
 
     <form action="/groups/<%= group.id %>/chores/<%= chore.id %>/update" method="post">
